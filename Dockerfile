@@ -1,13 +1,15 @@
 FROM golang:1.13 as builder
 
-COPY . /checkmake
+WORKDIR /checkmake
 
-RUN cd /go/src/github.com/mrtazz/checkmake && GOOS=linux GOARCH=amd64 CGO_ENABLED=0 make binaries
-RUN cd /go/src/github.com/mrtazz/checkmake && make test
+COPY . .
+
+RUN GOOS=linux GOARCH=amd64 CGO_ENABLED=0 make binaries
+RUN make test
 
 FROM alpine:3.9
-RUN apk add make
+RUN apk add --no-cache make=4.2.1-r2
 USER nobody
 
 COPY --from=builder /checkmake /
-ENTRYPOINT ["./checkmake", "/Makefile"]
+CMD ["./checkmake", "/Makefile"]
